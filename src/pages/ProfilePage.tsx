@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,42 +8,62 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ItemGrid } from "@/components/items/ItemGrid";
-import { mockItems, mockUsers } from "@/data/mockData";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { User, Mail, Phone, Save } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { itemsService, authService } from "@/lib/supabase";
+import { FileUpload } from "@/components/ui/file-upload";
+import { User, Mail, Phone, Save, Loader2 } from "lucide-react";
 
 export default function ProfilePage() {
-  // In a real app, this would come from authentication
-  const currentUser = mockUsers[0];
-  
-  const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
+  const { user, updateProfile } = useAuth();
+  const [isUpdating, setIsUpdating] = useState(false);
   const [profileForm, setProfileForm] = useState({
-    name: currentUser.name,
-    email: currentUser.email,
-    contactNumber: currentUser.contactNumber || "",
+    name: user?.name || "",
+    email: user?.email || "",
+    contactNumber: user?.contactNumber || "",
+    avatar: user?.avatar || "",
   });
 
-  // Get user's reported items
-  const userItems = mockItems.filter(item => item.reportedBy.id === currentUser.id);
+  // Fetch user's reported items
+  const { data: userItems = [], isLoading: isLoadingItems } = useQuery({
+    queryKey: ['userItems', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data } = await supabase
+        .from('items')
+        .select('*, reported_by:users(*)')
+        .eq('reported_by', user.id);
+      return data || [];
+    },
+    enabled: !!user,
+  });
 
-  const handleProfileUpdate = (e: React.FormEvent) => {
+  const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
-      toast({
-        title: "Profile Updated",
-        description: "Your profile information has been updated successfully.",
+    if (!user) return;
+    
+    setIsUpdating(true);
+    
+    try {
+      await updateProfile({
+        name: profileForm.name,
+        contactNumber: profileForm.contactNumber,
+        avatar: profileForm.avatar,
       });
-    }, 1000);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   const handleInputChange = (field: string, value: string) => {
     setProfileForm({ ...profileForm, [field]: value });
+  };
+
+  const handleAvatarChange = (url: string) => {
+    setProfileForm({ ...profileForm, avatar: url });
   };
 
   const getInitials = (name: string) => {
@@ -52,6 +73,22 @@ export default function ProfilePage() {
       .join("")
       .toUpperCase();
   };
+
+  if (!user) {
+    return (
+      <MainLayout>
+        <div className="container mx-auto py-10 px-4 md:px-6">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-4">Not Signed In</h1>
+            <p className="mb-4">You need to be signed in to view your profile.</p>
+            <Button asChild>
+              <a href="/auth/login">Sign In</a>
+            </Button>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
@@ -63,28 +100,28 @@ export default function ProfilePage() {
               <CardHeader className="text-center">
                 <div className="flex justify-center mb-4">
                   <Avatar className="h-24 w-24">
-                    <AvatarImage src={currentUser.avatar} alt={currentUser.name} />
-                    <AvatarFallback className="text-lg">{getInitials(currentUser.name)}</AvatarFallback>
+                    <AvatarImage src={user.avatar} alt={user.name} />
+                    <AvatarFallback className="text-lg">{getInitials(user.name)}</AvatarFallback>
                   </Avatar>
                 </div>
-                <CardTitle>{currentUser.name}</CardTitle>
-                <CardDescription>{currentUser.email}</CardDescription>
+                <CardTitle>{user.name}</CardTitle>
+                <CardDescription>{user.email}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center text-sm">
                     <Mail className="mr-2 h-4 w-4 text-muted-foreground" />
-                    <span>{currentUser.email}</span>
+                    <span>{user.email}</span>
                   </div>
-                  {currentUser.contactNumber && (
+                  {user.contactNumber && (
                     <div className="flex items-center text-sm">
                       <Phone className="mr-2 h-4 w-4 text-muted-foreground" />
-                      <span>{currentUser.contactNumber}</span>
+                      <span>{user.contactNumber}</span>
                     </div>
                   )}
                   <div className="flex items-center text-sm">
                     <User className="mr-2 h-4 w-4 text-muted-foreground" />
-                    <span>Role: {currentUser.role}</span>
+                    <span>Role: {user.role}</span>
                   </div>
                 </div>
               </CardContent>
@@ -101,7 +138,11 @@ export default function ProfilePage() {
               
               <TabsContent value="items" className="mt-6">
                 <h2 className="text-2xl font-bold mb-4">My Reported Items</h2>
-                {userItems.length > 0 ? (
+                {isLoadingItems ? (
+                  <div className="flex justify-center py-10">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  </div>
+                ) : userItems.length > 0 ? (
                   <ItemGrid items={userItems} />
                 ) : (
                   <Card>
@@ -124,11 +165,24 @@ export default function ProfilePage() {
                   <CardContent>
                     <form onSubmit={handleProfileUpdate} className="space-y-6">
                       <div className="space-y-2">
+                        <Label htmlFor="avatar">Profile Picture</Label>
+                        <FileUpload
+                          value={profileForm.avatar}
+                          onFileChange={() => {}}
+                          onFileUpload={authService.uploadAvatar}
+                          onChange={handleAvatarChange}
+                          preview={true}
+                          label="Upload Avatar"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
                         <Label htmlFor="name">Full Name</Label>
                         <Input
                           id="name"
                           value={profileForm.name}
                           onChange={(e) => handleInputChange("name", e.target.value)}
+                          disabled={isUpdating}
                         />
                       </div>
                       <div className="space-y-2">
@@ -137,8 +191,10 @@ export default function ProfilePage() {
                           id="email"
                           type="email"
                           value={profileForm.email}
-                          onChange={(e) => handleInputChange("email", e.target.value)}
+                          disabled={true}
+                          className="bg-muted"
                         />
+                        <p className="text-xs text-muted-foreground">Email cannot be changed</p>
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="contactNumber">Contact Number</Label>
@@ -146,10 +202,16 @@ export default function ProfilePage() {
                           id="contactNumber"
                           value={profileForm.contactNumber}
                           onChange={(e) => handleInputChange("contactNumber", e.target.value)}
+                          disabled={isUpdating}
                         />
                       </div>
-                      <Button type="submit" disabled={loading} className="flex items-center">
-                        {loading ? "Updating..." : (
+                      <Button type="submit" disabled={isUpdating} className="flex items-center">
+                        {isUpdating ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Updating...
+                          </>
+                        ) : (
                           <>
                             <Save className="mr-2 h-4 w-4" />
                             Update Profile

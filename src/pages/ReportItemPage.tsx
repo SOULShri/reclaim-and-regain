@@ -9,19 +9,32 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FileUpload } from "@/components/ui/file-upload";
 import { categories, departments, locations } from "@/data/mockData";
-import { ItemCategory, ItemStatus, ItemFormData, Department } from "@/types";
+import { ItemCategory, ItemStatus, Department } from "@/types";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, ImagePlus, Building, MapPin, Calendar, Info } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { itemsService } from "@/lib/supabase";
+import { Upload, ImagePlus, Building, MapPin, Calendar, Info, Loader2 } from "lucide-react";
 
 export default function ReportItemPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<ItemStatus>("lost");
-  const [loading, setLoading] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
   
-  const [formData, setFormData] = useState<Partial<ItemFormData>>({
+  const [formData, setFormData] = useState<{
+    title: string;
+    description: string;
+    category: ItemCategory;
+    status: ItemStatus;
+    department?: Department;
+    location: string;
+    date: string;
+    images: string[];
+  }>({
     title: "",
     description: "",
     category: "other",
@@ -41,21 +54,24 @@ export default function ReportItemPage() {
     setFormData({ ...formData, [field]: value });
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-        // In a real app, you would upload the image to a server
-        // and then set the URL in the form data
-        setFormData({ ...formData, images: [reader.result as string] });
-      };
-      reader.readAsDataURL(file);
+  const handleImageUpload = async (file: File) => {
+    try {
+      const imageUrl = await itemsService.uploadImage(file);
+      setUploadedImageUrl(imageUrl);
+      setFormData({ ...formData, images: [imageUrl] });
+      return imageUrl;
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      toast({
+        title: "Upload Failed",
+        description: "Failed to upload image. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate form
@@ -68,17 +84,47 @@ export default function ReportItemPage() {
       return;
     }
     
-    setLoading(true);
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "You must be logged in to report an item",
+        variant: "destructive",
+      });
+      navigate("/auth/login");
+      return;
+    }
     
-    // Simulate form submission
-    setTimeout(() => {
-      setLoading(false);
+    setIsSubmitting(true);
+    
+    try {
+      // Create the item in the database
+      await itemsService.createItem({
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        status: formData.status,
+        department: formData.department,
+        location: formData.location,
+        date: formData.date,
+        images: formData.images,
+      }, user.id);
+      
       toast({
         title: "Item Reported Successfully",
         description: `Your ${activeTab} item has been reported.`,
       });
+      
       navigate(`/${activeTab}-items`);
-    }, 1500);
+    } catch (error) {
+      console.error("Error reporting item:", error);
+      toast({
+        title: "Submission Failed",
+        description: "Failed to report item. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -122,6 +168,7 @@ export default function ReportItemPage() {
                     value={formData.title}
                     onChange={(e) => handleInputChange("title", e.target.value)}
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
 
@@ -132,7 +179,8 @@ export default function ReportItemPage() {
                     </Label>
                     <Select
                       value={formData.category}
-                      onValueChange={(value) => handleInputChange("category", value)}
+                      onValueChange={(value) => handleInputChange("category", value as ItemCategory)}
+                      disabled={isSubmitting}
                     >
                       <SelectTrigger id="category">
                         <SelectValue placeholder="Select category" />
@@ -155,6 +203,7 @@ export default function ReportItemPage() {
                     <Select
                       value={formData.department}
                       onValueChange={(value) => handleInputChange("department", value as Department)}
+                      disabled={isSubmitting}
                     >
                       <SelectTrigger id="department">
                         <SelectValue placeholder="Select department" />
@@ -179,6 +228,7 @@ export default function ReportItemPage() {
                     value={formData.description}
                     onChange={(e) => handleInputChange("description", e.target.value)}
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
 
@@ -191,6 +241,7 @@ export default function ReportItemPage() {
                     <Select
                       value={formData.location}
                       onValueChange={(value) => handleInputChange("location", value)}
+                      disabled={isSubmitting}
                     >
                       <SelectTrigger id="location">
                         <SelectValue placeholder="Select location" />
@@ -215,52 +266,34 @@ export default function ReportItemPage() {
                       value={formData.date}
                       onChange={(e) => handleInputChange("date", e.target.value)}
                       required
+                      disabled={isSubmitting}
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label>Upload Image</Label>
-                  <div className="border-2 border-dashed rounded-lg p-4 text-center hover:bg-muted/50 transition-colors cursor-pointer">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      id="image-upload"
-                      className="hidden"
-                      onChange={handleImageChange}
-                    />
-                    <label htmlFor="image-upload" className="cursor-pointer block">
-                      {imagePreview ? (
-                        <div className="flex flex-col items-center gap-2">
-                          <img
-                            src={imagePreview}
-                            alt="Preview"
-                            className="h-40 object-contain mx-auto"
-                          />
-                          <Button type="button" variant="outline" size="sm">
-                            <ImagePlus className="h-4 w-4 mr-2" />
-                            Change Image
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-center gap-2">
-                          <Upload className="h-10 w-10 text-muted-foreground mb-2" />
-                          <p className="text-sm text-muted-foreground">
-                            Drag and drop or click to upload an image
-                          </p>
-                          <Button type="button" variant="outline" size="sm">
-                            <Upload className="h-4 w-4 mr-2" />
-                            Upload Image
-                          </Button>
-                        </div>
-                      )}
-                    </label>
-                  </div>
+                  <FileUpload
+                    onFileChange={() => {}}
+                    onFileUpload={handleImageUpload}
+                    value={uploadedImageUrl || undefined}
+                    onChange={(url) => setFormData({...formData, images: [url]})}
+                    accept="image/*"
+                    preview={true}
+                    label="Upload Image"
+                  />
                 </div>
               </CardContent>
               <CardFooter>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Submitting..." : `Report ${activeTab} Item`}
+                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    `Report ${activeTab} Item`
+                  )}
                 </Button>
               </CardFooter>
             </form>

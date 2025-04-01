@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/AuthContext";
+import { Loader2 } from "lucide-react";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
+  const { signUp, isLoading } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -23,57 +23,31 @@ export default function RegisterPage() {
     setFormData({ ...formData, [field]: value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validation
-    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill out all required fields",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (!formData.email.includes("@vjti")) {
-      toast({
-        title: "Invalid Email",
-        description: "Please use your VJTI email address",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (formData.password.length < 6) {
-      toast({
-        title: "Weak Password",
-        description: "Password must be at least 6 characters long",
-        variant: "destructive",
-      });
-      return;
-    }
-    
+    // Local validation
     if (formData.password !== formData.confirmPassword) {
-      toast({
-        title: "Password Mismatch",
-        description: "Passwords do not match",
-        variant: "destructive",
-      });
+      // The toast will be shown from the auth context
       return;
     }
     
-    setLoading(true);
-    
-    // Simulate registration process
-    setTimeout(() => {
-      setLoading(false);
-      toast({
-        title: "Registration Successful",
-        description: "Your account has been created. You can now sign in.",
-      });
+    try {
+      await signUp(
+        formData.email, 
+        formData.password, 
+        {
+          name: formData.name,
+          contactNumber: formData.contactNumber,
+        }
+      );
+      
+      // After successful registration, redirect to login
       navigate("/auth/login");
-    }, 1500);
+    } catch (error) {
+      // Error is handled in auth context
+      console.error("Registration failed:", error);
+    }
   };
 
   return (
@@ -102,6 +76,7 @@ export default function RegisterPage() {
                   value={formData.name}
                   onChange={(e) => handleInputChange("name", e.target.value)}
                   required
+                  disabled={isLoading}
                 />
               </div>
               <div className="space-y-2">
@@ -113,6 +88,7 @@ export default function RegisterPage() {
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
                   required
+                  disabled={isLoading}
                 />
                 <p className="text-xs text-muted-foreground">
                   Must be a valid VJTI email address
@@ -126,6 +102,7 @@ export default function RegisterPage() {
                   placeholder="9876543210"
                   value={formData.contactNumber}
                   onChange={(e) => handleInputChange("contactNumber", e.target.value)}
+                  disabled={isLoading}
                 />
               </div>
               <div className="space-y-2">
@@ -137,6 +114,7 @@ export default function RegisterPage() {
                   value={formData.password}
                   onChange={(e) => handleInputChange("password", e.target.value)}
                   required
+                  disabled={isLoading}
                 />
                 <p className="text-xs text-muted-foreground">
                   Must be at least 6 characters
@@ -151,10 +129,18 @@ export default function RegisterPage() {
                   value={formData.confirmPassword}
                   onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
                   required
+                  disabled={isLoading}
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Creating account..." : "Create account"}
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating account...
+                  </>
+                ) : (
+                  "Create account"
+                )}
               </Button>
             </CardContent>
           </form>
