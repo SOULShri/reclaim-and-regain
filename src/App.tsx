@@ -14,6 +14,7 @@ import ReportItemPage from "./pages/ReportItemPage";
 import ProfilePage from "./pages/ProfilePage";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
+import ContactPage from "./pages/ContactPage";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/lost-items" element={<ItemsPage />} />
             <Route path="/found-items" element={<ItemsPage />} />
             <Route path="/items/:id" element={<ItemDetailPage />} />
+            <Route path="/contact" element={<ContactPage />} />
             <Route path="/report" element={
               <ProtectedRoute>
                 <ReportItemPage />
