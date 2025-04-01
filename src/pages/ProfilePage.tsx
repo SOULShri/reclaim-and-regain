@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ItemGrid } from "@/components/items/ItemGrid";
 import { useAuth } from "@/context/AuthContext";
 import { useQuery } from "@tanstack/react-query";
-import { itemsService, authService } from "@/lib/supabase";
+import { itemsService, authService, supabase } from "@/lib/supabase";
 import { FileUpload } from "@/components/ui/file-upload";
 import { User, Mail, Phone, Save, Loader2 } from "lucide-react";
 
