@@ -34,7 +34,7 @@ export function ItemFilters({ onFilterChange }: ItemFiltersProps) {
   };
 
   const handleSelectChange = (key: string, value: string) => {
-    const newFilters = { ...filters, [key]: value };
+    const newFilters = { ...filters, [key]: value === "all" ? undefined : value };
     setFilters(newFilters);
     onFilterChange(newFilters);
   };
@@ -69,14 +69,14 @@ export function ItemFilters({ onFilterChange }: ItemFiltersProps) {
           <div className="space-y-2">
             <Label htmlFor="category">Category</Label>
             <Select
-              value={filters.category}
+              value={filters.category || "all"}
               onValueChange={(value) => handleSelectChange("category", value)}
             >
               <SelectTrigger id="category">
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Categories</SelectItem>
+                <SelectItem value="all">All Categories</SelectItem>
                 {categories.map((category) => (
                   <SelectItem key={category.value} value={category.value}>
                     {category.label}
@@ -89,14 +89,14 @@ export function ItemFilters({ onFilterChange }: ItemFiltersProps) {
           <div className="space-y-2">
             <Label htmlFor="status">Status</Label>
             <Select
-              value={filters.status}
+              value={filters.status || "all"}
               onValueChange={(value) => handleSelectChange("status", value)}
             >
               <SelectTrigger id="status">
                 <SelectValue placeholder="All Statuses" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Statuses</SelectItem>
+                <SelectItem value="all">All Statuses</SelectItem>
                 <SelectItem value="lost">Lost</SelectItem>
                 <SelectItem value="found">Found</SelectItem>
                 <SelectItem value="claimed">Claimed</SelectItem>
