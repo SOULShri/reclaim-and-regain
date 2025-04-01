@@ -1,5 +1,4 @@
-
-import { Item, User, ItemCategory, ItemStatus } from "@/types";
+import { Item, User, ItemCategory, ItemStatus, Department } from "@/types";
 
 export const categories: { value: ItemCategory; label: string }[] = [
   { value: "electronics", label: "Electronics" },
@@ -9,6 +8,32 @@ export const categories: { value: ItemCategory; label: string }[] = [
   { value: "books", label: "Books" },
   { value: "documents", label: "Documents" },
   { value: "other", label: "Other" },
+];
+
+export const departments: { value: Department; label: string }[] = [
+  { value: "information_technology", label: "Information Technology" },
+  { value: "computer_science", label: "Computer Science" },
+  { value: "mechanical", label: "Mechanical" },
+  { value: "electrical", label: "Electrical" },
+  { value: "entc", label: "ENTC" },
+  { value: "electronics", label: "Electronics" },
+  { value: "civil", label: "Civil" },
+  { value: "production", label: "Production" },
+  { value: "other", label: "Other" },
+];
+
+export const locations = [
+  "Main Building",
+  "Admin Block",
+  "Library",
+  "Canteen",
+  "Sports Complex",
+  "Computer Labs",
+  "Electronics Labs",
+  "Mechanical Workshop",
+  "Auditorium",
+  "Parking Area",
+  "Hostel Block"
 ];
 
 export const mockUsers: User[] = [
@@ -37,6 +62,7 @@ export const mockItems: Item[] = [
     description: "Silver MacBook Pro 13-inch with a sticker of VJTI logo on the cover. Last seen in the Central Library on the 2nd floor.",
     category: "electronics",
     status: "lost",
+    department: "computer_science",
     images: ["https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=1000&auto=format&fit=crop"],
     location: "Central Library, 2nd Floor",
     date: "2023-06-15",
@@ -50,6 +76,7 @@ export const mockItems: Item[] = [
     description: "A blue metal water bottle with a VJTI sticker. Found near the canteen area.",
     category: "other",
     status: "found",
+    department: "mechanical",
     images: ["https://images.unsplash.com/photo-1602143407151-7111542de6e8?q=80&w=1000&auto=format&fit=crop"],
     location: "College Canteen",
     date: "2023-06-16",
@@ -63,6 +90,7 @@ export const mockItems: Item[] = [
     description: "Scientific calculator with name 'Rajesh' written on the back. Lost during the Engineering Mathematics exam.",
     category: "electronics",
     status: "lost",
+    department: "electrical",
     images: ["https://images.unsplash.com/photo-1564939558297-fc396f18e5c7?q=80&w=1000&auto=format&fit=crop"],
     location: "Exam Hall B, Room 204",
     date: "2023-06-14",
@@ -76,6 +104,7 @@ export const mockItems: Item[] = [
     description: "Student ID card for Priya Sharma, 3rd year Computer Engineering.",
     category: "documents",
     status: "found",
+    department: "information_technology",
     images: ["https://images.unsplash.com/photo-1593431074633-21ef64707d29?q=80&w=1000&auto=format&fit=crop"],
     location: "Main Entrance",
     date: "2023-06-17",
@@ -89,6 +118,7 @@ export const mockItems: Item[] = [
     description: "A black Wildcraft backpack with a Mechanical Engineering department logo patch. Contains textbooks and a laptop charger.",
     category: "accessories",
     status: "lost",
+    department: "mechanical",
     images: ["https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=1000&auto=format&fit=crop"],
     location: "Mechanical Workshop",
     date: "2023-06-18",
@@ -102,11 +132,40 @@ export const mockItems: Item[] = [
     description: "Brown leather wallet with initials AK. Contains some cash and an Aadhar card.",
     category: "accessories",
     status: "found",
+    department: "civil",
     images: ["https://images.unsplash.com/photo-1627123424574-724758594e93?q=80&w=1000&auto=format&fit=crop"],
     location: "Sports Field",
     date: "2023-06-19",
     reportedBy: mockUsers[1],
     createdAt: "2023-06-19T11:45:00.000Z",
     updatedAt: "2023-06-19T11:45:00.000Z",
+  },
+  {
+    id: "7",
+    title: "Drafting Equipment Set",
+    description: "Complete drafting set with compass, divider, and rulers in a black case with name 'Amit' on it.",
+    category: "stationery",
+    status: "lost",
+    department: "civil",
+    images: ["https://images.unsplash.com/photo-1589987607627-527f5aa0c573?q=80&w=1000&auto=format&fit=crop"],
+    location: "Civil Engineering Drawing Hall",
+    date: "2023-06-20",
+    reportedBy: mockUsers[0],
+    createdAt: "2023-06-20T10:15:00.000Z",
+    updatedAt: "2023-06-20T10:15:00.000Z",
+  },
+  {
+    id: "8",
+    title: "Electronics Lab Manual",
+    description: "Lab manual for Digital Electronics with handwritten notes inside. Name on cover: 'Shivani Patil'.",
+    category: "books",
+    status: "found",
+    department: "electronics",
+    images: ["https://images.unsplash.com/photo-1544239495-a53dd729d62d?q=80&w=1000&auto=format&fit=crop"],
+    location: "Electronics Lab 2",
+    date: "2023-06-21",
+    reportedBy: mockUsers[1],
+    createdAt: "2023-06-21T14:30:00.000Z",
+    updatedAt: "2023-06-21T14:30:00.000Z",
   },
 ];

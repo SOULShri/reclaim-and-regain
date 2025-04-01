@@ -9,10 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { categories } from "@/data/mockData";
-import { ItemCategory, ItemStatus, ItemFormData } from "@/types";
+import { categories, departments, locations } from "@/data/mockData";
+import { ItemCategory, ItemStatus, ItemFormData, Department } from "@/types";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, ImagePlus } from "lucide-react";
+import { Upload, ImagePlus, Building, MapPin, Calendar, Info } from "lucide-react";
 
 export default function ReportItemPage() {
   const navigate = useNavigate();
@@ -26,6 +26,7 @@ export default function ReportItemPage() {
     description: "",
     category: "other",
     status: "lost",
+    department: "other",
     location: "",
     date: new Date().toISOString().split("T")[0],
     images: [],
@@ -111,7 +112,10 @@ export default function ReportItemPage() {
             <form onSubmit={handleSubmit}>
               <CardContent className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Item Name *</Label>
+                  <Label htmlFor="title" className="flex items-center gap-2">
+                    <Info className="h-4 w-4" />
+                    Item Name *
+                  </Label>
                   <Input
                     id="title"
                     placeholder="e.g. Blue Backpack, Student ID Card"
@@ -121,23 +125,49 @@ export default function ReportItemPage() {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="category">Category *</Label>
-                  <Select
-                    value={formData.category}
-                    onValueChange={(value) => handleInputChange("category", value)}
-                  >
-                    <SelectTrigger id="category">
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.value} value={category.value}>
-                          {category.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="category" className="flex items-center gap-2">
+                      Category *
+                    </Label>
+                    <Select
+                      value={formData.category}
+                      onValueChange={(value) => handleInputChange("category", value)}
+                    >
+                      <SelectTrigger id="category">
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category.value} value={category.value}>
+                            {category.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="department" className="flex items-center gap-2">
+                      <Building className="h-4 w-4" />
+                      Department *
+                    </Label>
+                    <Select
+                      value={formData.department}
+                      onValueChange={(value) => handleInputChange("department", value as Department)}
+                    >
+                      <SelectTrigger id="department">
+                        <SelectValue placeholder="Select department" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {departments.map((dept) => (
+                          <SelectItem key={dept.value} value={dept.value}>
+                            {dept.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -154,17 +184,31 @@ export default function ReportItemPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="location">Location *</Label>
-                    <Input
-                      id="location"
-                      placeholder="e.g. Central Library, 2nd Floor"
+                    <Label htmlFor="location" className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      Location *
+                    </Label>
+                    <Select
                       value={formData.location}
-                      onChange={(e) => handleInputChange("location", e.target.value)}
-                      required
-                    />
+                      onValueChange={(value) => handleInputChange("location", value)}
+                    >
+                      <SelectTrigger id="location">
+                        <SelectValue placeholder="Select location" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {locations.map((loc) => (
+                          <SelectItem key={loc} value={loc}>
+                            {loc}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="date">Date *</Label>
+                    <Label htmlFor="date" className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      Date *
+                    </Label>
                     <Input
                       id="date"
                       type="date"

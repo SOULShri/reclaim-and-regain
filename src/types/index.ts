@@ -19,6 +19,17 @@ export type ItemCategory =
   | "documents" 
   | "other";
 
+export type Department = 
+  | "information_technology"
+  | "computer_science"
+  | "mechanical"
+  | "electrical"
+  | "entc"
+  | "electronics"
+  | "civil"
+  | "production"
+  | "other";
+
 export type Item = {
   id: string;
   title: string;
@@ -27,6 +38,7 @@ export type Item = {
   status: ItemStatus;
   images: string[];
   location: string;
+  department?: Department;
   date: string;
   reportedBy: User;
   createdAt: string;

@@ -5,7 +5,7 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { ItemGrid } from "@/components/items/ItemGrid";
 import { ItemFilters } from "@/components/items/ItemFilters";
 import { mockItems } from "@/data/mockData";
-import { Item, ItemCategory, ItemStatus } from "@/types";
+import { Item, ItemCategory, ItemStatus, Department } from "@/types";
 
 export default function ItemsPage() {
   const { type } = useParams<{ type: string }>();
@@ -37,6 +37,8 @@ export default function ItemsPage() {
     search?: string;
     category?: ItemCategory;
     status?: ItemStatus;
+    department?: Department;
+    location?: string;
     dateFrom?: string;
     dateTo?: string;
   }) => {
@@ -54,6 +56,14 @@ export default function ItemsPage() {
 
     if (filters.category) {
       filtered = filtered.filter(item => item.category === filters.category);
+    }
+
+    if (filters.department) {
+      filtered = filtered.filter(item => item.department === filters.department);
+    }
+
+    if (filters.location) {
+      filtered = filtered.filter(item => item.location.includes(filters.location));
     }
 
     if (filters.dateFrom) {
