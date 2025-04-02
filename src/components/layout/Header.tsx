@@ -12,11 +12,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Contact, LogOut, Search, Settings, User } from "lucide-react";
-import { ContactNavItem } from "./ContactNavItem";
+import ContactNavItem from "./ContactNavItem";
 import { HelpNavItem } from "./HelpNavItem";
 
 export const Header = () => {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
 
   return (
     <header className="border-b">
@@ -70,7 +70,7 @@ export const Header = () => {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout} className="flex items-center gap-2 cursor-pointer">
+                <DropdownMenuItem onClick={signOut} className="flex items-center gap-2 cursor-pointer">
                   <LogOut className="h-4 w-4" />
                   Log Out
                 </DropdownMenuItem>
