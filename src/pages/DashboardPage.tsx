@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsItem, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ItemGrid } from "@/components/items/ItemGrid";
 import { useAuth } from "@/context/AuthContext";
@@ -13,6 +13,8 @@ import { Loader2, Search, Bell, AlertTriangle, CheckCircle, Clock, ChevronRight 
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Link } from "react-router-dom";
+import { ItemMatches } from "@/components/dashboard/ItemMatches";
+import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -86,7 +88,8 @@ export default function DashboardPage() {
           <TabsList className="mb-8">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="my-items">My Items</TabsTrigger>
-            <TabsTrigger value="latest">Latest Items</TabsTrigger>
+            <TabsTrigger value="matches">Matches</TabsTrigger>
+            <TabsTrigger value="activity">Activity</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -253,28 +256,12 @@ export default function DashboardPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="latest">
-            <Card>
-              <CardHeader>
-                <CardTitle>Latest Items in the System</CardTitle>
-                <CardDescription>
-                  Recently reported lost and found items
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {isLoadingLatest ? (
-                  <div className="flex justify-center py-10">
-                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                  </div>
-                ) : latestItems.length > 0 ? (
-                  <ItemGrid items={latestItems} />
-                ) : (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground">No items have been reported yet.</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+          <TabsContent value="matches">
+            <ItemMatches />
+          </TabsContent>
+
+          <TabsContent value="activity">
+            <ActivityFeed />
           </TabsContent>
         </Tabs>
       </div>
