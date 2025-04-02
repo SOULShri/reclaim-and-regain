@@ -15,6 +15,7 @@ import ProfilePage from "./pages/ProfilePage";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import ContactPage from "./pages/ContactPage";
+import HelpPage from "./pages/HelpPage";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/found-items" element={<ItemsPage />} />
             <Route path="/items/:id" element={<ItemDetailPage />} />
             <Route path="/contact" element={<ContactPage />} />
+            <Route path="/help" element={<HelpPage />} />
             <Route path="/report" element={
               <ProtectedRoute>
                 <ReportItemPage />
