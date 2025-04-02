@@ -98,3 +98,75 @@
     @apply hover:shadow-lg transition-all duration-300;
   }
 }
+
+/* Futuristic UI Additions */
+@layer components {
+  .glassmorphism {
+    @apply bg-white/80 dark:bg-white/10 backdrop-blur-lg border border-white/20 dark:border-white/10 shadow-xl;
+  }
+  
+  .gradient-text {
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-400 dark:to-purple-400;
+  }
+  
+  .gradient-border {
+    @apply relative before:absolute before:inset-0 before:p-[1px] before:rounded-lg before:bg-gradient-to-r before:from-indigo-500 before:via-purple-500 before:to-pink-500 before:-z-10 dark:before:from-indigo-600 dark:before:via-purple-600 dark:before:to-pink-600;
+  }
+  
+  .gradient-button {
+    @apply bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white shadow-md hover:shadow-lg transition-all;
+  }
+  
+  .glass-card {
+    @apply bg-white/40 dark:bg-gray-900/40 backdrop-blur-md border border-white/20 dark:border-gray-800/30 shadow-xl rounded-xl;
+  }
+  
+  .pulse-animation {
+    @apply animate-[pulse_3s_infinite];
+  }
+  
+  .glow {
+    @apply relative before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-r before:from-indigo-500 before:to-purple-500 before:blur-xl before:opacity-30 before:-z-10;
+  }
+  
+  .grid-bg {
+    @apply relative before:absolute before:inset-0 before:bg-[radial-gradient(circle_8px_at_0_0,rgba(0,0,0,0),rgba(0,0,0,0)_95%,rgba(0,0,0,0.03)_96%,rgba(0,0,0,0.03))] before:bg-[length:20px_20px] before:opacity-30 before:-z-10;
+  }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.float-animation {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 10px 0 rgba(167, 139, 250, 0.3); }
+  50% { box-shadow: 0 0 30px 5px rgba(167, 139, 250, 0.5); }
+}
+
+.pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 dark:bg-gray-700 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400 dark:bg-gray-600;
+}
