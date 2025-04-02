@@ -12,6 +12,7 @@ import ItemsPage from "./pages/ItemsPage";
 import ItemDetailPage from "./pages/ItemDetailPage";
 import ReportItemPage from "./pages/ReportItemPage";
 import ProfilePage from "./pages/ProfilePage";
+import DashboardPage from "./pages/DashboardPage";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import ContactPage from "./pages/ContactPage";
@@ -43,6 +44,11 @@ const App = () => (
             <Route path="/profile" element={
               <ProtectedRoute>
                 <ProfilePage />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <DashboardPage />
               </ProtectedRoute>
             } />
             <Route path="/auth/login" element={<LoginPage />} />

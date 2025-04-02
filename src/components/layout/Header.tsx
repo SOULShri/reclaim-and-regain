@@ -11,12 +11,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Contact, LogOut, Search, Settings, User } from "lucide-react";
+import { Contact, LogOut, Search, Settings, User, Bell } from "lucide-react";
 import ContactNavItem from "./ContactNavItem";
 import { HelpNavItem } from "./HelpNavItem";
+import { useRealtime } from "@/hooks/useRealtime";
+import { Badge } from "@/components/ui/badge";
 
 export const Header = () => {
   const { user, signOut } = useAuth();
+  const { newItemCount, resetNewItemCount } = useRealtime();
 
   return (
     <header className="border-b">
@@ -47,6 +50,18 @@ export const Header = () => {
         </div>
 
         <div className="flex items-center gap-2">
+          {user && (
+            <Link to="/dashboard" onClick={resetNewItemCount} className="relative">
+              <Button variant="ghost" size="icon">
+                <Bell className="h-5 w-5" />
+                {newItemCount > 0 && (
+                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
+                    {newItemCount}
+                  </Badge>
+                )}
+              </Button>
+            </Link>
+          )}
           <ContactNavItem />
           <HelpNavItem />
           
@@ -67,6 +82,12 @@ export const Header = () => {
                   <Link to="/profile" className="flex items-center gap-2 cursor-pointer">
                     <User className="h-4 w-4" />
                     Profile
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/dashboard" className="flex items-center gap-2 cursor-pointer">
+                    <Settings className="h-4 w-4" />
+                    Dashboard
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

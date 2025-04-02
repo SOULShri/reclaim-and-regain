@@ -8,9 +8,13 @@ export function useRealtime() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [newItemCount, setNewItemCount] = useState(0);
 
   useEffect(() => {
     if (!user) return;
+
+    // Reset new item count when component mounts
+    setNewItemCount(0);
 
     // Subscribe to item changes
     const subscription = supabase
@@ -24,6 +28,8 @@ export function useRealtime() {
         if (payload.new.reported_by !== user.id) {
           const status = payload.new.status;
           const title = payload.new.title;
+          
+          setNewItemCount(prev => prev + 1);
           
           toast({
             title: `New ${status} Item Reported`,
@@ -55,5 +61,5 @@ export function useRealtime() {
     };
   }, [user, toast]);
 
-  return { isSubscribed };
+  return { isSubscribed, newItemCount, resetNewItemCount: () => setNewItemCount(0) };
 }

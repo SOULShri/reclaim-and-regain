@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,6 +10,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import SimpleMap from "@/components/map/SimpleMap";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
@@ -48,6 +48,8 @@ const ContactPage = () => {
       setIsSubmitting(false);
     }, 1500);
   };
+
+  const officeAddress = "Lost & Found Center, 123 Recovery Street, Findsville, FD 12345";
 
   return (
     <MainLayout>
@@ -237,14 +239,8 @@ const ContactPage = () => {
         </div>
         
         {/* Map Section */}
-        <div className="mt-12 rounded-lg overflow-hidden shadow-md h-64 bg-gray-100 flex items-center justify-center">
-          <div className="text-center p-6">
-            <MapPin className="h-10 w-10 text-primary mx-auto mb-4" />
-            <h3 className="text-lg font-medium mb-2">Find Us on the Map</h3>
-            <p className="text-muted-foreground">
-              Visit our Lost & Found Center at 123 Recovery Street, Findsville, FD 12345
-            </p>
-          </div>
+        <div className="mt-12 rounded-lg overflow-hidden shadow-md">
+          <SimpleMap address={officeAddress} className="h-64 w-full" />
         </div>
       </div>
     </MainLayout>
