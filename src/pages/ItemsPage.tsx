@@ -6,6 +6,9 @@ import { ItemGrid } from "@/components/items/ItemGrid";
 import { ItemFilters } from "@/components/items/ItemFilters";
 import { mockItems } from "@/data/mockData";
 import { Item, ItemCategory, ItemStatus, Department } from "@/types";
+import { AnimatedBackground } from "@/components/ui/animated-background";
+import { AnimatedStat } from "@/components/ui/animated-stat";
+import { Search, Map, Tag, Calendar } from "lucide-react";
 
 export default function ItemsPage() {
   const { type } = useParams<{ type: string }>();
@@ -30,7 +33,7 @@ export default function ItemsPage() {
       setItems(itemsToShow);
       setFilteredItems(itemsToShow);
       setIsLoading(false);
-    }, 500);
+    }, 800);
   }, [itemStatus]);
 
   const handleFilterChange = (filters: {
@@ -79,18 +82,59 @@ export default function ItemsPage() {
 
     setFilteredItems(filtered);
   };
+  
+  // Calculate some statistics
+  const locationCount = [...new Set(items.map(item => item.location))].length;
+  const categoryCount = [...new Set(items.map(item => item.category))].length;
+  const newestItemDate = items.length > 0 
+    ? new Date(Math.max(...items.map(item => new Date(item.date).getTime())))
+    : new Date();
+  const daysAgo = Math.floor((new Date().getTime() - newestItemDate.getTime()) / (1000 * 3600 * 24));
 
   return (
     <MainLayout>
-      <section className="py-10 px-4 md:px-6">
-        <div className="container mx-auto">
-          <h1 className="text-3xl font-bold mb-8">{pageTitle}</h1>
-          <div className="mb-8">
+      <AnimatedBackground variant="grid" className="py-10 px-4 md:px-6">
+        <div className="container mx-auto animate-fade-in">
+          <h1 className="text-3xl font-bold mb-4 gradient-text inline-block">{pageTitle}</h1>
+          
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 fade-in">
+            <AnimatedStat 
+              value={items.length} 
+              label="Total Items" 
+              icon={<Search className="h-6 w-6" />} 
+              className="bg-white/50 rounded-xl shadow-sm hover-scale"
+            />
+            <AnimatedStat 
+              value={locationCount} 
+              label="Locations" 
+              icon={<Map className="h-6 w-6" />}
+              className="bg-white/50 rounded-xl shadow-sm hover-scale"
+            />
+            <AnimatedStat 
+              value={categoryCount} 
+              label="Categories" 
+              icon={<Tag className="h-6 w-6" />}
+              className="bg-white/50 rounded-xl shadow-sm hover-scale"
+            />
+            <AnimatedStat 
+              value={daysAgo} 
+              label="Days Since Latest" 
+              suffix=" days"
+              icon={<Calendar className="h-6 w-6" />}
+              className="bg-white/50 rounded-xl shadow-sm hover-scale"
+            />
+          </div>
+          
+          <div className="mb-8 glass p-6 rounded-xl slide-in">
+            <h2 className="text-lg font-medium mb-4">Filter Items</h2>
             <ItemFilters onFilterChange={handleFilterChange} />
           </div>
-          <ItemGrid items={filteredItems} isLoading={isLoading} />
+          
+          <div className="fade-in">
+            <ItemGrid items={filteredItems} isLoading={isLoading} />
+          </div>
         </div>
-      </section>
+      </AnimatedBackground>
     </MainLayout>
   );
 }
