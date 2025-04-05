@@ -23,7 +23,9 @@ export function MainLayout({ children }: MainLayoutProps) {
           {/* Empty div to satisfy the children prop requirement */}
           <div></div>
         </AnimatedBackground>
-        {children}
+        <div className="container mx-auto px-4 py-8 animate-scale">
+          {children}
+        </div>
       </main>
       <Footer />
     </div>

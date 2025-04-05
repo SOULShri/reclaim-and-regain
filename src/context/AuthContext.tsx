@@ -11,6 +11,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, userData: Partial<User>) => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (userData: Partial<User>) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -64,6 +65,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       toast({
         title: "Login Failed",
         description: error.message || "An error occurred during login",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const signInWithGoogle = async () => {
+    try {
+      setIsLoading(true);
+      await authService.signInWithGoogle();
+      const currentUser = await authService.getCurrentUser();
+      if (currentUser) {
+        setUser(currentUser);
+        toast({
+          title: "Login Successful",
+          description: `Welcome, ${currentUser.name}!`,
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Google Login Failed",
+        description: error.message || "An error occurred during Google login",
         variant: "destructive",
       });
       throw error;
@@ -138,7 +163,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, signIn, signUp, signOut, updateProfile }}>
+    <AuthContext.Provider value={{ user, isLoading, signIn, signUp, signOut, updateProfile, signInWithGoogle }}>
       {children}
     </AuthContext.Provider>
   );
