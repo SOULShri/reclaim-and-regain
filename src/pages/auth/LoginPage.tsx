@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
-import { Loader2, Mail } from "lucide-react";
+import { Loader2, Mail, AlertCircle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -20,37 +21,47 @@ export default function LoginPage() {
     password: "",
     rollno: "",
   });
+  const [error, setError] = useState<string | null>(null);
 
   // Get the redirect path from location state or default to home
   const from = (location.state as any)?.from?.pathname || "/";
 
   const handleInputChange = (field: string, value: string) => {
     setFormData({ ...formData, [field]: value });
+    // Clear error when user starts typing again
+    if (error) setError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     
     try {
       if (activeTab === "email") {
         await signIn(formData.email, formData.password);
       } else {
         // Use roll number authentication
+        if (formData.rollno.length !== 9 || !/^\d+$/.test(formData.rollno)) {
+          setError("Please enter a valid 9-digit roll number");
+          return;
+        }
         await signIn(`${formData.rollno}@vjti.ac.in`, formData.password);
       }
       navigate(from, { replace: true });
-    } catch (error) {
-      // Error is handled in the auth context
+    } catch (error: any) {
       console.error("Login failed:", error);
+      setError(error?.message || "Login failed. Please check your credentials.");
     }
   };
 
   const handleGoogleSignIn = async () => {
     try {
+      setError(null);
       await signInWithGoogle();
       navigate(from, { replace: true });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Google login failed:", error);
+      setError("Google login failed. Please try again later.");
     }
   };
 
@@ -70,6 +81,16 @@ export default function LoginPage() {
               Enter your credentials to sign in
             </CardDescription>
           </CardHeader>
+          
+          {error && (
+            <div className="px-6 mb-4">
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            </div>
+          )}
           
           <Tabs defaultValue="email" className="px-6" onValueChange={(value) => setActiveTab(value as "email" | "rollno")}>
             <TabsList className="grid w-full grid-cols-2 mb-4">
@@ -110,6 +131,7 @@ export default function LoginPage() {
                       disabled={isLoading}
                       className="transition-all duration-300 focus:ring-2 focus:ring-primary/50"
                     />
+                    <p className="text-xs text-muted-foreground">Format: 9 digits, e.g. 231080010</p>
                   </div>
                 </TabsContent>
                 
@@ -131,6 +153,7 @@ export default function LoginPage() {
                     className="transition-all duration-300 focus:ring-2 focus:ring-primary/50"
                   />
                 </div>
+                
                 <Button type="submit" className="w-full hover-glow" disabled={isLoading}>
                   {isLoading ? (
                     <>
@@ -178,6 +201,12 @@ export default function LoginPage() {
                   </svg>
                   Sign in with Google
                 </Button>
+                
+                <div className="text-center text-sm text-muted-foreground">
+                  <p>Demo credentials (for testing):</p>
+                  <p>Email: demo@vjti.ac.in</p>
+                  <p>Password: demo123</p>
+                </div>
               </CardContent>
             </form>
           </Tabs>

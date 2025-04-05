@@ -1,5 +1,6 @@
 
 import React, { useEffect, useRef } from 'react';
+import { MapPin } from 'lucide-react';
 
 interface SimpleMapProps {
   address: string;
@@ -15,20 +16,20 @@ const SimpleMap: React.FC<SimpleMapProps> = ({ address, className = "h-64 w-full
     const mapElement = mapRef.current;
     
     if (mapElement) {
-      // Create a simple map visualization placeholder with animation
+      // Create a better map visualization placeholder without network requests
       mapElement.innerHTML = `
-        <div class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg overflow-hidden shadow-lg animate-fade-in">
+        <div class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-purple-50 to-indigo-50 rounded-lg overflow-hidden shadow-lg animate-fade-in">
           <div class="absolute inset-0 bg-grid-slate-200 [mask-image:linear-gradient(0deg,#fff,rgba(255,255,255,0.6))] opacity-20"></div>
           
-          <div class="animate-float">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-primary mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div class="animate-pulse mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1113.314 0z" />
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           </div>
           
           <div class="text-center px-4 relative z-10">
-            <h3 class="font-medium text-lg mb-1 gradient-text">Find Us Here</h3>
+            <h3 class="font-medium text-lg mb-1 gradient-text">Location</h3>
             <p class="text-sm text-muted-foreground">${address}</p>
             
             <div class="mt-4">
@@ -37,8 +38,6 @@ const SimpleMap: React.FC<SimpleMapProps> = ({ address, className = "h-64 w-full
               </button>
             </div>
           </div>
-          
-          <div class="absolute bottom-2 right-2 text-xs text-muted-foreground/50">Map data placeholder</div>
         </div>
       `;
     }
@@ -50,7 +49,15 @@ const SimpleMap: React.FC<SimpleMapProps> = ({ address, className = "h-64 w-full
     };
   }, [address]);
 
-  return <div ref={mapRef} className={`${className} overflow-hidden transition-all duration-300 hover:shadow-xl`}></div>;
+  return (
+    <div ref={mapRef} className={`${className} overflow-hidden transition-all duration-300 hover:shadow-xl relative`}>
+      {/* Fallback in case the JavaScript doesn't execute */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <MapPin className="h-6 w-6 text-primary" />
+        <span className="ml-2 text-sm">{address}</span>
+      </div>
+    </div>
+  );
 };
 
 export default SimpleMap;

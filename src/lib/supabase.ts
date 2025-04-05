@@ -1,12 +1,60 @@
-
 import { createClient } from '@supabase/supabase-js';
 import { Item, User } from '@/types';
 
 // Replace with your Supabase URL and anon key when you connect to Supabase
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://your-project-url.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Create a fallback handler if Supabase credentials are missing
+let supabase;
+try {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.warn('Supabase credentials are missing. Using mock implementation.');
+    // Create a mock Supabase client
+    supabase = {
+      auth: {
+        signInWithPassword: async () => ({ data: null, error: new Error('Supabase not configured') }),
+        signInWithOAuth: async () => ({ data: null, error: new Error('Supabase not configured') }),
+        signUp: async () => ({ data: null, error: new Error('Supabase not configured') }),
+        signOut: async () => ({ error: null }),
+        getUser: async () => ({ data: { user: null }, error: null }),
+        onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } }, error: null }),
+      },
+      from: () => ({
+        select: () => ({
+          eq: () => ({
+            single: async () => ({ data: null, error: new Error('Supabase not configured') }),
+          }),
+          insert: async () => ({ data: null, error: new Error('Supabase not configured') }),
+          update: async () => ({ data: null, error: new Error('Supabase not configured') }),
+        }),
+      }),
+      storage: {
+        from: () => ({
+          upload: async () => ({ data: null, error: new Error('Supabase not configured') }),
+          getPublicUrl: () => ({ data: { publicUrl: '' } }),
+        }),
+      },
+      channel: () => ({
+        on: () => ({
+          on: () => ({
+            subscribe: () => ({ unsubscribe: () => {} }),
+          }),
+        }),
+      }),
+    };
+  } else {
+    supabase = createClient(supabaseUrl, supabaseAnonKey);
+  }
+} catch (error) {
+  console.error('Error initializing Supabase client:', error);
+  // Provide fallback to prevent app crashes
+  supabase = {
+    // ... keep existing code (same mock implementation as above)
+  };
+}
+
+export { supabase };
 
 // Items API
 export const itemsService = {

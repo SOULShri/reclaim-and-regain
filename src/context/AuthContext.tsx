@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { User } from '@/types';
 import { authService, supabase } from '@/lib/supabase';
@@ -29,6 +28,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(currentUser);
       } catch (error) {
         console.error('Error checking authentication:', error);
+        // Don't show error toast here as it's just a session check
       } finally {
         setIsLoading(false);
       }
@@ -39,8 +39,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Set up auth state listener
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        const currentUser = await authService.getCurrentUser();
-        setUser(currentUser);
+        try {
+          const currentUser = await authService.getCurrentUser();
+          setUser(currentUser);
+        } catch (error) {
+          console.error('Auth state change error:', error);
+        }
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
       }
@@ -54,17 +58,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signIn = async (email: string, password: string) => {
     try {
       setIsLoading(true);
+      // Handle case where Supabase is not fully configured
+      if (!supabase || !supabase.auth) {
+        toast({
+          title: "Authentication Error",
+          description: "Authentication service is not available. Please try again later.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       await authService.signIn(email, password);
       const currentUser = await authService.getCurrentUser();
       setUser(currentUser);
       toast({
         title: "Login Successful",
-        description: `Welcome back, ${currentUser?.name}!`,
+        description: `Welcome back, ${currentUser?.name || 'User'}!`,
       });
     } catch (error: any) {
+      console.error('Sign in error:', error);
       toast({
         title: "Login Failed",
-        description: error.message || "An error occurred during login",
+        description: error.message || "An error occurred during login. Please check your credentials and try again.",
         variant: "destructive",
       });
       throw error;
@@ -76,6 +91,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signInWithGoogle = async () => {
     try {
       setIsLoading(true);
+      // Handle case where Supabase is not fully configured
+      if (!supabase || !supabase.auth) {
+        toast({
+          title: "Authentication Error",
+          description: "Google authentication is not available. Please try again later.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       await authService.signInWithGoogle();
       const currentUser = await authService.getCurrentUser();
       if (currentUser) {
@@ -86,9 +111,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         });
       }
     } catch (error: any) {
+      console.error('Google sign in error:', error);
       toast({
         title: "Google Login Failed",
-        description: error.message || "An error occurred during Google login",
+        description: error.message || "An error occurred during Google login. Please try again later.",
         variant: "destructive",
       });
       throw error;
