@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { cn } from '@/lib/utils';
 
 interface AnimatedBackgroundProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   variant?: 'dots' | 'grid' | 'waves' | 'gradient';
   className?: string;
   intensity?: 'light' | 'medium' | 'heavy';

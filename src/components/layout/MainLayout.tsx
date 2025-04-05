@@ -19,7 +19,10 @@ export function MainLayout({ children }: MainLayoutProps) {
           intensity="medium"
           className="absolute top-0 left-0 w-full h-64 -z-10"
           animated={true}
-        />
+        >
+          {/* Empty div to satisfy the children prop requirement */}
+          <div></div>
+        </AnimatedBackground>
         {children}
       </main>
       <Footer />
