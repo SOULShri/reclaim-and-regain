@@ -349,5 +349,5 @@ export const authService = {
   }
 };
 
-// Export authService so it can be imported directly from this file
+// Remove the duplicate authService export and import from services file instead
 export { authService } from '@/services/authService';
