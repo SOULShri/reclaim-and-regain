@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 import { User, Item, ItemCategory, ItemStatus, Department } from '@/types';
 import { Tables } from '@/types/supabase';
@@ -306,45 +305,6 @@ export const supabaseAuthService = {
       return data;
     } catch (error) {
       console.error('Update profile error:', error);
-      throw error;
-    }
-  },
-  
-  async uploadAvatar(file: File) {
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-      const filePath = `avatars/${fileName}`;
-      
-      const { error: storageError } = await supabase.storage
-        .from('users')
-        .upload(filePath, file);
-      
-      if (storageError) {
-        // If the bucket doesn't exist, create it and try again
-        if (storageError.message.includes('does not exist')) {
-          await supabase.storage.createBucket('users', {
-            public: true,
-            fileSizeLimit: 5242880 // 5MB
-          });
-          
-          const { error } = await supabase.storage
-            .from('users')
-            .upload(filePath, file);
-          
-          if (error) throw error;
-        } else {
-          throw storageError;
-        }
-      }
-      
-      const { data } = supabase.storage
-        .from('users')
-        .getPublicUrl(filePath);
-      
-      return data.publicUrl;
-    } catch (error) {
-      console.error('Avatar upload error:', error);
       throw error;
     }
   }
