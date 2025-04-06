@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
+import { useAuthContext } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -11,14 +11,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Contact, LogOut, Search, Settings, User, Bell } from "lucide-react";
+import { Contact, LogOut, Settings, User, Bell } from "lucide-react";
 import ContactNavItem from "./ContactNavItem";
 import { HelpNavItem } from "./HelpNavItem";
 import { useRealtime } from "@/hooks/useRealtime";
 import { Badge } from "@/components/ui/badge";
 
 export const Header = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut } = useAuthContext();
   const { newItemCount, resetNewItemCount } = useRealtime();
 
   return (

@@ -1,0 +1,98 @@
+
+import { User } from '@/types';
+import { supabase } from '@/lib/supabase';
+
+/**
+ * Service for handling authentication related API calls
+ */
+export const authService = {
+  /**
+   * Sign in a user with email and password
+   */
+  async signIn(email: string, password: string) {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    
+    if (error) throw error;
+  },
+
+  /**
+   * Sign in with Google OAuth
+   */
+  async signInWithGoogle() {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    
+    if (error) throw error;
+  },
+
+  /**
+   * Sign up a new user with email and password
+   */
+  async signUp(email: string, password: string, userData: Partial<User>) {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: userData,
+      }
+    });
+    
+    if (error) throw error;
+  },
+
+  /**
+   * Sign out the current user
+   */
+  async signOut() {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+  },
+
+  /**
+   * Get the current authenticated user with profile data
+   */
+  async getCurrentUser(): Promise<User | null> {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return null;
+    
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', session.user.id)
+      .single();
+    
+    if (error || !data) return null;
+    
+    return {
+      id: data.id,
+      email: session.user.email || '',
+      name: data.name || '',
+      role: data.role || 'user',
+      avatar: data.avatar_url || '',
+      contactNumber: data.contact_number || '',
+    };
+  },
+
+  /**
+   * Update user profile data
+   */
+  async updateProfile(userId: string, userData: Partial<User>) {
+    const { error } = await supabase
+      .from('users')
+      .update({
+        name: userData.name,
+        avatar_url: userData.avatar,
+        contact_number: userData.contactNumber,
+      })
+      .eq('id', userId);
+    
+    if (error) throw error;
+  }
+};

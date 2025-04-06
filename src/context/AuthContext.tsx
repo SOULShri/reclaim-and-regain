@@ -1,8 +1,7 @@
 
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useContext } from 'react';
 import { User } from '@/types';
-import { authService, supabase } from '@/lib/supabase';
-import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 interface AuthContextType {
   user: User | null;
@@ -17,211 +16,19 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
-
-  useEffect(() => {
-    const checkUser = async () => {
-      try {
-        const currentUser = await authService.getCurrentUser();
-        setUser(currentUser);
-      } catch (error) {
-        console.error('Error checking authentication:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    // First set up the auth state listener
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state change:', event, session?.user?.id);
-      
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        try {
-          // Use setTimeout to avoid blocking the auth state change
-          setTimeout(async () => {
-            const currentUser = await authService.getCurrentUser();
-            setUser(currentUser);
-            setIsLoading(false);
-          }, 0);
-        } catch (error) {
-          console.error('Auth state change error:', error);
-          setIsLoading(false);
-        }
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null);
-        setIsLoading(false);
-      }
-    });
-
-    // Then check for an existing session
-    checkUser();
-
-    return () => {
-      authListener?.subscription.unsubscribe();
-    };
-  }, []);
-
-  const signIn = async (email: string, password: string) => {
-    try {
-      setIsLoading(true);
-      if (!supabase || !supabase.auth) {
-        toast({
-          title: "Authentication Error",
-          description: "Authentication service is not available. Please try again later.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      await authService.signIn(email, password);
-      const currentUser = await authService.getCurrentUser();
-      setUser(currentUser);
-      toast({
-        title: "Login Successful",
-        description: `Welcome back, ${currentUser?.name || 'User'}!`,
-      });
-    } catch (error: any) {
-      console.error('Sign in error:', error);
-      toast({
-        title: "Login Failed",
-        description: error.message || "An error occurred during login. Please check your credentials and try again.",
-        variant: "destructive",
-      });
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const signInWithGoogle = async () => {
-    try {
-      setIsLoading(true);
-      if (!supabase || !supabase.auth) {
-        toast({
-          title: "Authentication Error",
-          description: "Google authentication is not available. Please try again later.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      try {
-        await authService.signInWithGoogle();
-      } catch (error: any) {
-        // Check specifically for the provider not enabled error
-        if (error.message && error.message.includes('provider is not enabled')) {
-          toast({
-            title: "Google Login Failed",
-            description: "Google authentication is not enabled in your Supabase project. Please configure it in the Supabase dashboard.",
-            variant: "destructive",
-          });
-          setIsLoading(false);
-          return;
-        }
-        throw error;
-      }
-      
-      // Note: For OAuth, the auth state change event will handle updating the user state
-      // We don't need to do anything else here as the browser will be redirected
-    } catch (error: any) {
-      console.error('Google sign in error:', error);
-      toast({
-        title: "Google Login Failed",
-        description: error.message || "An error occurred during Google login. Please try again later.",
-        variant: "destructive",
-      });
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const signUp = async (email: string, password: string, userData: Partial<User>) => {
-    try {
-      setIsLoading(true);
-      await authService.signUp(email, password, userData);
-      toast({
-        title: "Registration Successful",
-        description: "Your account has been created. Please verify your email.",
-      });
-    } catch (error: any) {
-      let errorMessage = error.message || "An error occurred during registration";
-      
-      // Provide more helpful error messages
-      if (error.message.includes('User already registered')) {
-        errorMessage = "This email is already registered. Please try logging in instead.";
-      } else if (error.message.includes('password')) {
-        errorMessage = "Password must be at least 6 characters long.";
-      }
-      
-      toast({
-        title: "Registration Failed",
-        description: errorMessage,
-        variant: "destructive",
-      });
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const signOut = async () => {
-    try {
-      setIsLoading(true);
-      await authService.signOut();
-      setUser(null);
-      toast({
-        title: "Signed Out",
-        description: "You have been successfully logged out.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Sign Out Failed",
-        description: error.message || "An error occurred during sign out",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const updateProfile = async (userData: Partial<User>) => {
-    if (!user) return;
-    
-    try {
-      setIsLoading(true);
-      await authService.updateProfile(user.id, userData);
-      
-      setUser({ ...user, ...userData });
-      
-      toast({
-        title: "Profile Updated",
-        description: "Your profile has been successfully updated.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Update Failed",
-        description: error.message || "An error occurred while updating your profile",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  const auth = useAuth();
+  
   return (
-    <AuthContext.Provider value={{ user, isLoading, signIn, signUp, signOut, updateProfile, signInWithGoogle }}>
+    <AuthContext.Provider value={auth}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => {
+export const useAuthContext = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuthContext must be used within an AuthProvider');
   }
   return context;
 };

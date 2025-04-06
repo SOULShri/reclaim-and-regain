@@ -1,10 +1,21 @@
+import { createClient } from '@supabase/supabase-js';
+import { User, Item, ItemCategory, ItemStatus, Department } from '@/types';
+import { Tables } from '@/types/supabase';
 
-
-import { Item, User } from '@/types';
-import { supabase } from '@/integrations/supabase/client';
-
-// Export the supabase client so it can be used by other files
-export { supabase };
+// Create a single supabase client for interacting with your database
+export const supabase = createClient<{
+  Tables: Tables;
+}>(
+  'https://idptwncxekmrbdjrfswn.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkcHR3bmN4ZWttcmJkanJmc3duIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM4MjQ5OTgsImV4cCI6MjA1OTQwMDk5OH0.9owhNpJy4HYBVdUoFv0gePBio-d5IAJ-F14YBLTE1QE',
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      storage: localStorage
+    }
+  }
+);
 
 // Items API
 export const itemsService = {
@@ -337,3 +348,6 @@ export const authService = {
     }
   }
 };
+
+// Export authService so it can be imported directly from this file
+export { authService } from '@/services/authService';
