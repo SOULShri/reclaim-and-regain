@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { User } from '@/types';
 import { authService, supabase } from '@/lib/supabase';
@@ -27,7 +28,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(currentUser);
       } catch (error) {
         console.error('Error checking authentication:', error);
-        // Don't show error toast here as it's just a session check
       } finally {
         setIsLoading(false);
       }
@@ -97,7 +97,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
       
-      await authService.signInWithGoogle();
+      try {
+        await authService.signInWithGoogle();
+      } catch (error: any) {
+        // Check specifically for the provider not enabled error
+        if (error.message && error.message.includes('provider is not enabled')) {
+          toast({
+            title: "Google Login Failed",
+            description: "Google authentication is not enabled in your Supabase project. Please configure it in the Supabase dashboard.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+        throw error;
+      }
+      
       const currentUser = await authService.getCurrentUser();
       if (currentUser) {
         setUser(currentUser);
