@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 import { User, Item, ItemCategory, ItemStatus, Department } from '@/types';
 import { Tables } from '@/types/supabase';
@@ -146,8 +147,8 @@ export const itemsService = {
   }
 };
 
-// Auth API
-export const authService = {
+// Legacy Auth API (renamed to avoid conflict)
+export const supabaseAuthService = {
   async signUp(email: string, password: string, userData: Partial<User>) {
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -349,5 +350,6 @@ export const authService = {
   }
 };
 
-// Remove the duplicate authService export and import from services file instead
-export { authService } from '@/services/authService';
+// Import authService from the dedicated service file
+import { authService } from '@/services/authService';
+export { authService };
