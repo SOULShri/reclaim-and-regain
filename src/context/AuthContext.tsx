@@ -33,20 +33,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    checkUser();
-
+    // First set up the auth state listener
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state change:', event, session?.user?.id);
+      
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         try {
-          const currentUser = await authService.getCurrentUser();
-          setUser(currentUser);
+          // Use setTimeout to avoid blocking the auth state change
+          setTimeout(async () => {
+            const currentUser = await authService.getCurrentUser();
+            setUser(currentUser);
+            setIsLoading(false);
+          }, 0);
         } catch (error) {
           console.error('Auth state change error:', error);
+          setIsLoading(false);
         }
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
+        setIsLoading(false);
       }
     });
+
+    // Then check for an existing session
+    checkUser();
 
     return () => {
       authListener?.subscription.unsubscribe();
@@ -113,14 +123,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         throw error;
       }
       
-      const currentUser = await authService.getCurrentUser();
-      if (currentUser) {
-        setUser(currentUser);
-        toast({
-          title: "Login Successful",
-          description: `Welcome, ${currentUser.name}!`,
-        });
-      }
+      // Note: For OAuth, the auth state change event will handle updating the user state
+      // We don't need to do anything else here as the browser will be redirected
     } catch (error: any) {
       console.error('Google sign in error:', error);
       toast({
@@ -143,9 +147,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         description: "Your account has been created. Please verify your email.",
       });
     } catch (error: any) {
+      let errorMessage = error.message || "An error occurred during registration";
+      
+      // Provide more helpful error messages
+      if (error.message.includes('User already registered')) {
+        errorMessage = "This email is already registered. Please try logging in instead.";
+      } else if (error.message.includes('password')) {
+        errorMessage = "Password must be at least 6 characters long.";
+      }
+      
       toast({
         title: "Registration Failed",
-        description: error.message || "An error occurred during registration",
+        description: errorMessage,
         variant: "destructive",
       });
       throw error;
