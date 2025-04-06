@@ -19,20 +19,6 @@ export const authService = {
   },
 
   /**
-   * Sign in with Google OAuth
-   */
-  async signInWithGoogle() {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-    
-    if (error) throw error;
-  },
-
-  /**
    * Sign up a new user with email and password
    */
   async signUp(email: string, password: string, userData: Partial<User>) {

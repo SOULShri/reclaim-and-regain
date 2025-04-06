@@ -81,24 +81,6 @@ export const useAuth = () => {
     }
   };
 
-  const signInWithGoogle = async () => {
-    try {
-      setIsLoading(true);
-      await authService.signInWithGoogle();
-      // Note: Auth state change listener will handle updating user state
-    } catch (error: any) {
-      console.error('Google sign in error:', error);
-      toast({
-        title: "Google Login Failed",
-        description: error.message || "An error occurred during Google login. Please try again later.",
-        variant: "destructive",
-      });
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const signUp = async (email: string, password: string, userData: Partial<User>) => {
     try {
       setIsLoading(true);
@@ -178,7 +160,6 @@ export const useAuth = () => {
     signIn,
     signUp,
     signOut,
-    updateProfile,
-    signInWithGoogle
+    updateProfile
   };
 };
