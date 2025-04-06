@@ -1,8 +1,6 @@
-
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { User } from '@/types';
-import { authService } from '@/lib/supabase';
-import { supabase } from '@/integrations/supabase/client';
+import { authService, supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
@@ -23,7 +21,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check for existing session
     const checkUser = async () => {
       try {
         const currentUser = await authService.getCurrentUser();
@@ -38,7 +35,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     checkUser();
 
-    // Set up auth state listener
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         try {
@@ -60,7 +56,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signIn = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      // Handle case where Supabase is not fully configured
       if (!supabase || !supabase.auth) {
         toast({
           title: "Authentication Error",
@@ -93,7 +88,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signInWithGoogle = async () => {
     try {
       setIsLoading(true);
-      // Handle case where Supabase is not fully configured
       if (!supabase || !supabase.auth) {
         toast({
           title: "Authentication Error",
@@ -172,7 +166,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setIsLoading(true);
       await authService.updateProfile(user.id, userData);
       
-      // Update local user state with new data
       setUser({ ...user, ...userData });
       
       toast({

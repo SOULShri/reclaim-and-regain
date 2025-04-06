@@ -6,7 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
-import { MainLayout } from "@/components/layout/MainLayout";
 
 // Pages
 import HomePage from "./pages/HomePage";
@@ -21,6 +20,7 @@ import ContactPage from "./pages/ContactPage";
 import HelpPage from "./pages/HelpPage";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import { MainLayout } from "./components/layout/MainLayout";
 
 const queryClient = new QueryClient();
 

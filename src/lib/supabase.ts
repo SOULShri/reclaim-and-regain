@@ -1,5 +1,9 @@
+
 import { Item, User } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
+
+// Export the supabase client so it can be used by other files
+export { supabase };
 
 // Items API
 export const itemsService = {
