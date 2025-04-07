@@ -45,25 +45,30 @@ export const authService = {
    * Get the current authenticated user with profile data
    */
   async getCurrentUser(): Promise<User | null> {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return null;
-    
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', session.user.id)
-      .single();
-    
-    if (error || !data) return null;
-    
-    return {
-      id: data.id,
-      email: session.user.email || '',
-      name: data.name || '',
-      role: data.role || 'user',
-      avatar: data.avatar_url || '',
-      contactNumber: data.contact_number || '',
-    };
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return null;
+      
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+      
+      if (error || !data) return null;
+      
+      return {
+        id: data.id,
+        email: session.user.email || '',
+        name: data.name || '',
+        role: data.role || 'user',
+        avatar: data.avatar_url || '',
+        contactNumber: data.contact_number || '',
+      };
+    } catch (error) {
+      console.error('Error getting current user:', error);
+      return null;
+    }
   },
 
   /**
