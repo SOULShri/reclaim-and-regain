@@ -89,7 +89,7 @@ export const useAuth = () => {
       await authService.signUp(email, password, userData);
       toast({
         title: "Registration Successful",
-        description: "Your account has been created. Please check your email for verification.",
+        description: "Your account has been created! You can now log in.",
       });
     } catch (error: any) {
       let errorMessage = error.message || "An error occurred during registration";
@@ -103,6 +103,42 @@ export const useAuth = () => {
       toast({
         title: "Registration Failed",
         description: errorMessage,
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const signInWithGoogle = async () => {
+    try {
+      setIsLoading(true);
+      await authService.signInWithGoogle();
+      // Toast is shown after redirect back to app
+    } catch (error: any) {
+      console.error('Google sign in error:', error);
+      toast({
+        title: "Google Sign In Failed",
+        description: error.message || "An error occurred during Google sign in.",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const signInWithGithub = async () => {
+    try {
+      setIsLoading(true);
+      await authService.signInWithGithub();
+      // Toast is shown after redirect back to app
+    } catch (error: any) {
+      console.error('Github sign in error:', error);
+      toast({
+        title: "Github Sign In Failed",
+        description: error.message || "An error occurred during Github sign in.",
         variant: "destructive",
       });
       throw error;
@@ -160,6 +196,8 @@ export const useAuth = () => {
     isLoading,
     signIn,
     signUp,
+    signInWithGoogle,
+    signInWithGithub,
     signOut,
     updateProfile
   };

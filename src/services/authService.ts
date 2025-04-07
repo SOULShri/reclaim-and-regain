@@ -19,7 +19,7 @@ export const authService = {
   },
 
   /**
-   * Sign up a new user with email and password
+   * Sign up a new user with email and password (without email verification)
    */
   async signUp(email: string, password: string, userData: Partial<User>) {
     const { error } = await supabase.auth.signUp({
@@ -27,9 +27,38 @@ export const authService = {
       password,
       options: {
         data: userData,
+        emailRedirectTo: window.location.origin + '/auth/callback',
       }
     });
     
+    if (error) throw error;
+  },
+
+  /**
+   * Sign in with Google
+   */
+  async signInWithGoogle() {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin + '/auth/callback'
+      }
+    });
+
+    if (error) throw error;
+  },
+
+  /**
+   * Sign in with Github
+   */
+  async signInWithGithub() {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'github',
+      options: {
+        redirectTo: window.location.origin + '/auth/callback'
+      }
+    });
+
     if (error) throw error;
   },
 
